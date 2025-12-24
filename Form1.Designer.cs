@@ -28,71 +28,72 @@
         /// </summary>
         private void InitializeComponent()
         {
-            btnA0 = new Button();
-            btnA1 = new Button();
-            btnA2 = new Button();
-            btnA3 = new Button();
+            btnGetVoltage = new Button();
+            btnGetBits = new Button();
+            btnSetBits = new Button();
+            btnGetIOID = new Button();
             btnExit = new Button();
             lblA0 = new Label();
             lblA3 = new Label();
             lblA2 = new Label();
             lblA1 = new Label();
+            txtOutput = new TextBox();
+            lblStatus = new Label();
             SuspendLayout();
             // 
-            // btnA0
+            // btnGetVoltage
             // 
-            btnA0.Location = new Point(32, 42);
-            btnA0.Name = "btnA0";
-            btnA0.Size = new Size(75, 23);
-            btnA0.TabIndex = 0;
-            btnA0.Text = "Toggle A0";
-            btnA0.UseVisualStyleBackColor = true;
-            btnA0.Click += btnA0_Click;
+            btnGetVoltage.Location = new Point(32, 42);
+            btnGetVoltage.Name = "btnGetVoltage";
+            btnGetVoltage.Size = new Size(75, 23);
+            btnGetVoltage.TabIndex = 0;
+            btnGetVoltage.Text = "Get Voltage";
+            btnGetVoltage.UseVisualStyleBackColor = true;
+            btnGetVoltage.Click += btnGetVoltage_Click;
             // 
-            // btnA1
+            // btnGetBits
             // 
-            btnA1.Location = new Point(32, 71);
-            btnA1.Name = "btnA1";
-            btnA1.Size = new Size(75, 23);
-            btnA1.TabIndex = 1;
-            btnA1.Text = "Toggle A1";
-            btnA1.UseVisualStyleBackColor = true;
-            btnA1.Click += btnA1_Click;
+            btnGetBits.Location = new Point(32, 71);
+            btnGetBits.Name = "btnGetBits";
+            btnGetBits.Size = new Size(75, 23);
+            btnGetBits.TabIndex = 1;
+            btnGetBits.Text = "Get Bits";
+            btnGetBits.UseVisualStyleBackColor = true;
+            btnGetBits.Click += btnGetBits_Click;
             // 
-            // btnA2
+            // btnSetBits
             // 
-            btnA2.Location = new Point(32, 100);
-            btnA2.Name = "btnA2";
-            btnA2.Size = new Size(75, 23);
-            btnA2.TabIndex = 2;
-            btnA2.Text = "Toggle A2";
-            btnA2.UseVisualStyleBackColor = true;
-            btnA2.Click += btnA2_Click;
+            btnSetBits.Location = new Point(32, 100);
+            btnSetBits.Name = "btnSetBits";
+            btnSetBits.Size = new Size(75, 23);
+            btnSetBits.TabIndex = 2;
+            btnSetBits.Text = "Set Bits";
+            btnSetBits.UseVisualStyleBackColor = true;
+            btnSetBits.Click += btnSetBits_Click;
             // 
-            // btnA3
+            // btnGetIOID
             // 
-            btnA3.Location = new Point(32, 129);
-            btnA3.Name = "btnA3";
-            btnA3.Size = new Size(75, 23);
-            btnA3.TabIndex = 3;
-            btnA3.Text = "Toggle A3";
-            btnA3.UseVisualStyleBackColor = true;
-            btnA3.Click += btnA3_Click;
+            btnGetIOID.Location = new Point(32, 129);
+            btnGetIOID.Name = "btnGetIOID";
+            btnGetIOID.Size = new Size(75, 23);
+            btnGetIOID.TabIndex = 3;
+            btnGetIOID.Text = "Get IO ID";
+            btnGetIOID.UseVisualStyleBackColor = true;
+            btnGetIOID.Click += btnGetIOID_Click;
             // 
             // btnExit
             // 
-            btnExit.Location = new Point(86, 180);
+            btnExit.Location = new Point(145, 277);
             btnExit.Name = "btnExit";
             btnExit.Size = new Size(75, 23);
             btnExit.TabIndex = 4;
             btnExit.Text = "EXIT";
             btnExit.UseVisualStyleBackColor = true;
-            btnExit.Click += btnExit_Click;
             // 
             // lblA0
             // 
             lblA0.AutoSize = true;
-            lblA0.Location = new Point(159, 46);
+            lblA0.Location = new Point(113, 46);
             lblA0.Name = "lblA0";
             lblA0.Size = new Size(48, 15);
             lblA0.TabIndex = 5;
@@ -101,7 +102,7 @@
             // lblA3
             // 
             lblA3.AutoSize = true;
-            lblA3.Location = new Point(159, 133);
+            lblA3.Location = new Point(113, 133);
             lblA3.Name = "lblA3";
             lblA3.Size = new Size(48, 15);
             lblA3.TabIndex = 6;
@@ -110,7 +111,7 @@
             // lblA2
             // 
             lblA2.AutoSize = true;
-            lblA2.Location = new Point(159, 104);
+            lblA2.Location = new Point(113, 104);
             lblA2.Name = "lblA2";
             lblA2.Size = new Size(48, 15);
             lblA2.TabIndex = 7;
@@ -119,26 +120,44 @@
             // lblA1
             // 
             lblA1.AutoSize = true;
-            lblA1.Location = new Point(159, 75);
+            lblA1.Location = new Point(113, 75);
             lblA1.Name = "lblA1";
             lblA1.Size = new Size(48, 15);
             lblA1.TabIndex = 8;
             lblA1.Text = "A1: OFF";
             // 
+            // txtOutput
+            // 
+            txtOutput.Location = new Point(30, 173);
+            txtOutput.Name = "txtOutput";
+            txtOutput.Size = new Size(188, 23);
+            txtOutput.TabIndex = 9;
+            // 
+            // lblStatus
+            // 
+            lblStatus.AutoSize = true;
+            lblStatus.Location = new Point(30, 281);
+            lblStatus.Name = "lblStatus";
+            lblStatus.Size = new Size(77, 15);
+            lblStatus.TabIndex = 10;
+            lblStatus.Text = "Status: Ready";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(242, 254);
+            ClientSize = new Size(232, 312);
+            Controls.Add(lblStatus);
+            Controls.Add(txtOutput);
             Controls.Add(lblA1);
             Controls.Add(lblA2);
             Controls.Add(lblA3);
             Controls.Add(lblA0);
             Controls.Add(btnExit);
-            Controls.Add(btnA3);
-            Controls.Add(btnA2);
-            Controls.Add(btnA1);
-            Controls.Add(btnA0);
+            Controls.Add(btnGetIOID);
+            Controls.Add(btnSetBits);
+            Controls.Add(btnGetBits);
+            Controls.Add(btnGetVoltage);
             Name = "Form1";
             Text = "Form1";
             ResumeLayout(false);
@@ -147,14 +166,16 @@
 
         #endregion
 
-        private Button btnA0;
-        private Button btnA1;
-        private Button btnA2;
-        private Button btnA3;
+        private Button btnGetVoltage;
+        private Button btnGetBits;
+        private Button btnSetBits;
+        private Button btnGetIOID;
         private Button btnExit;
         private Label lblA0;
         private Label lblA3;
         private Label lblA2;
         private Label lblA1;
+        private TextBox txtOutput;
+        private Label lblStatus;
     }
 }

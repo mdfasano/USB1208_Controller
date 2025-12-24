@@ -6,53 +6,70 @@ namespace USB1208_Controller
 {
     public partial class Form1 : Form
     {
-        private MccBoard daqBoard;
-        private DigitalPortType port = DigitalPortType.FirstPortA;
-        private bool[] bitState = new bool[4];  // store state for A0–A3
+        private CustomBoard customBoard;
 
         public Form1()
         {
             InitializeComponent();
-            InitializeBoard();
+            customBoard = new CustomBoard(0);
         }
 
-        private void InitializeBoard()
+        private void btnGetVoltage_Click(object sender, EventArgs e)
         {
             try
             {
-                int boardNum = 0;
-                daqBoard = new MccBoard(boardNum);
-
-                // Configure Port A as output
-                ErrorInfo err = daqBoard.DConfigPort(port, DigitalPortDirection.DigitalOut);
-                if (err.Value != ErrorInfo.ErrorCode.NoErrors)
-                    MessageBox.Show("Error configuring port: " + err.Message);
+                double voltage = customBoard.GetVoltage(0); // Read from channel 0
+                txtOutput.Text = $"Analog Ch0: {voltage:F3} V";
+                lblStatus.Text = "Status: Voltage read successful";
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Initialization error: " + ex.Message);
+                lblStatus.Text = "Error: " + ex.Message;
             }
         }
 
-        private void ToggleBit(int bit, Label lbl)
+        private void btnGetBits_Click(object sender, EventArgs e)
         {
-            bitState[bit] = !bitState[bit];
-            DigitalLogicState state = bitState[bit] ? DigitalLogicState.High : DigitalLogicState.Low;
-
-            daqBoard.DBitOut(port, bit, state);
-            lbl.Text = $"A{bit}: {(bitState[bit] ? "ON" : "OFF")}";
-            lbl.ForeColor = bitState[bit] ? System.Drawing.Color.Green : System.Drawing.Color.Red;
+            try
+            {
+                byte bits = customBoard.GetBits(DigitalPortType.FirstPortB);
+                txtOutput.Text = $"Port B bits: {Convert.ToString(bits, 2).PadLeft(8, '0')}";
+                lblStatus.Text = "Status: Digital input read successful";
+            }
+            catch (Exception ex)
+            {
+                lblStatus.Text = "Error: " + ex.Message;
+            }
         }
 
-        private void btnA0_Click(object sender, EventArgs e) => ToggleBit(0, lblA0);
-        private void btnA1_Click(object sender, EventArgs e) => ToggleBit(1, lblA1);
-        private void btnA2_Click(object sender, EventArgs e) => ToggleBit(2, lblA2);
-        private void btnA3_Click(object sender, EventArgs e) => ToggleBit(3, lblA3);
-
-        private void btnExit_Click(object sender, EventArgs e)
+        private void btnSetBits_Click(object sender, EventArgs e)
         {
-            daqBoard = null;
-            Close();
+            try
+            {
+                // Example: set 0b10101010 on Port A
+                byte outputPattern = 0b10101010;
+                customBoard.SetBits(DigitalPortType.FirstPortA, outputPattern);
+                txtOutput.Text = "Port A set to 0b10101010";
+                lblStatus.Text = "Status: Digital output successful";
+            }
+            catch (Exception ex)
+            {
+                lblStatus.Text = "Error: " + ex.Message;
+            }
+        }
+
+        private void btnGetIOID_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string name = customBoard.GetIOId();
+                txtOutput.Text = "Board ID: " + name;
+                lblStatus.Text = "Status: ID retrieved successfully";
+            }
+            catch (Exception ex)
+            {
+                lblStatus.Text = "Error: " + ex.Message;
+            }
         }
     }
 }
