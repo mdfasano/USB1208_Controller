@@ -1,7 +1,9 @@
 ﻿using System;
 using MccDaq;
 
-namespace USB1208_Controller
+
+// this was written for the usb1208 device, which we decided not to use for the project
+namespace IctCustomControlBoard
 {
     public class CustomBoard
     {
