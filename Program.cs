@@ -1,53 +1,176 @@
+using IctCustomControlBoard;
 using System;
-using USB1208_Controller;
 
 class Program
 {
-    static void Main()
+    static void Main(string[] args)
     {
-        BoardManager manager = new BoardManager();
+        Console.WriteLine("=== Board Manager Test Console (with Direction Safety) ===");
 
-        while (true)
+        using (BoardManager manager = new())
         {
-            Console.WriteLine($"\nSelect a board (0 to {manager.BoardCount - 1}) or 'exit':");
-            string input = Console.ReadLine();
-            if (input.Trim().ToLower() == "exit") break;
-
-            if (!int.TryParse(input, out int boardIndex)) continue;
-
-            try
+            while (true)
             {
-                CustomBoard board = manager.GetBoard(boardIndex);
+                Console.WriteLine("\nSelect a board (0-3) or Q to quit:");
+                Console.WriteLine("0: Board0 (DIO, output)");
+                Console.WriteLine("1: Board1 (DIO, output)");
+                Console.WriteLine("2: Board2 (DIO, input)");
+                Console.WriteLine("3: Board3 (6002, analog + digital)");
+                Console.Write("> ");
 
-                Console.WriteLine("Action: 1 = Read Port A, 2 = Write Port B");
-                string action = Console.ReadLine();
+                string? input = Console.ReadLine()?.Trim().ToUpper();
+                if (input == "Q") break;
 
-                switch (action)
+                if (!int.TryParse(input, out int boardIndex) || boardIndex < 0 || boardIndex > 3)
                 {
-                    case "1":
-                        short valueA = board.GetBits("A");
-                        Console.WriteLine($"Port A: {Convert.ToString(valueA & 0xFF, 2).PadLeft(8, '0')}");
-                        break;
-                    case "2":
-                        Console.WriteLine("Enter value (0-255) for Port B:");
-                        string valStr = Console.ReadLine();
-                        if (byte.TryParse(valStr, out byte valueB))
-                        {
-                            board.SetBits("B", valueB);
-                            Console.WriteLine($"Port B set to {Convert.ToString(valueB, 2).PadLeft(8, '0')}");
-                        }
-                        break;
-                    default:
-                        Console.WriteLine("Unknown action.");
-                        break;
+                    Console.WriteLine("Invalid selection. Try again.");
+                    continue;
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
+
+                try
+                {
+                    switch (boardIndex)
+                    {
+                        case 0:
+                            TestDigitalBoard(manager.Board0, "Board0");
+                            break;
+                        case 1:
+                            TestDigitalBoard(manager.Board1, "Board1");
+                            break;
+                        case 2:
+                            TestDigitalBoard(manager.Board2, "Board2");
+                            break;
+                        case 3:
+                            TestAIBoard(manager.Board3);
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"  Error: {ex.Message}");
+                }
             }
         }
 
-        Console.WriteLine("Exiting program...");
+        Console.WriteLine("\nExiting program.");
+    }
+
+    // ==========================================================
+    // TEST: Digital I/O Board
+    // ==========================================================
+    static void TestDigitalBoard(CustomDIOBoard board, string name)
+    {
+        Console.WriteLine($"\n{name} selected ({board.GetIOID()}).");
+
+        Console.WriteLine("Enter port name (e.g., port0) or Q to go back:");
+        string? port = Console.ReadLine()?.Trim();
+        if (string.IsNullOrEmpty(port) || port.ToUpper() == "Q") return;
+
+        Console.WriteLine("Choose action: (R)ead or (W)rite:");
+        string? action = Console.ReadLine()?.Trim().ToUpper();
+
+        try
+        {
+            if (action == "W")
+            {
+                Console.Write("Enter value to write (0-255): ");
+                string? valStr = Console.ReadLine()?.Trim();
+                if (!byte.TryParse(valStr, out byte value))
+                {
+                    Console.WriteLine("Invalid value.");
+                    return;
+                }
+
+                board.SetBits(port, value);
+                Console.WriteLine($" Wrote 0x{value:X2} to {port}");
+            }
+            else if (action == "R")
+            {
+                byte bits = board.GetBits(port);
+                Console.WriteLine($" Read {port}: 0x{bits:X2}");
+            }
+            else
+            {
+                Console.WriteLine("Invalid action.");
+            }
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($" Operation blocked: {ex.Message}");
+        }
+    }
+
+    // ==========================================================
+    // TEST: 6002 Board (Analog + Digital)
+    // ==========================================================
+    static void TestAIBoard(CustomAIBoard board)
+    {
+        Console.WriteLine($"\nBoard3 (6002) selected ({board.GetIOID()}).");
+        Console.WriteLine("1: Digital I/O");
+        Console.WriteLine("2: Analog Input");
+        Console.WriteLine("Q: Back");
+        Console.Write("> ");
+
+        string? choice = Console.ReadLine()?.Trim().ToUpper();
+        if (choice == "Q") return;
+
+        try
+        {
+            switch (choice)
+            {
+                case "1":
+                    Console.Write("Enter port name (e.g., port0): ");
+                    string? port = Console.ReadLine()?.Trim();
+                    if (string.IsNullOrEmpty(port)) return;
+
+                    Console.Write("Choose action: (R)ead or (W)rite: ");
+                    string? action = Console.ReadLine()?.Trim().ToUpper();
+
+                    if (action == "W")
+                    {
+                        Console.Write("Enter value to write (0-255): ");
+                        string? valStr = Console.ReadLine()?.Trim();
+                        if (!byte.TryParse(valStr, out byte value))
+                        {
+                            Console.WriteLine("Invalid value.");
+                            return;
+                        }
+
+                        board.SetBits(port, value);
+                        Console.WriteLine($" Wrote 0x{value:X2} to {port}");
+                    }
+                    else if (action == "R")
+                    {
+                        byte bits = board.GetBits(port);
+                        Console.WriteLine($" Read {port}: 0x{bits:X2}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid action.");
+                    }
+                    break;
+
+                case "2":
+                    Console.Write("Enter analog channel number (0-7): ");
+                    string? chStr = Console.ReadLine()?.Trim();
+                    if (!int.TryParse(chStr, out int channel))
+                    {
+                        Console.WriteLine("Invalid channel number.");
+                        return;
+                    }
+
+                    double voltage = board.GetVoltage(channel);
+                    Console.WriteLine($" CH{channel}: {voltage:F3} V");
+                    break;
+
+                default:
+                    Console.WriteLine("Invalid choice.");
+                    break;
+            }
+        }
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($" Operation blocked: {ex.Message}");
+        }
     }
 }

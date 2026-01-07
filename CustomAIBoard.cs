@@ -1,5 +1,6 @@
-﻿using System;
-using NationalInstruments.DAQmx;
+﻿using NationalInstruments.DAQmx;
+using System;
+using System.DirectoryServices;
 
 // a class for interfacing with the usb-6002 Digital IO board from national instruments.
 // allows for reading and writing of bits on the device
@@ -11,9 +12,19 @@ namespace IctCustomControlBoard
     {
         private readonly string deviceName = deviceName;
 
+        // true = output, false = input
+        private readonly Dictionary<string, bool> portDirections = [];
+
         // SetBits: write an 8-bit value to a digital output port
         public void SetBits(string portName, byte value)
         {
+            // validate that we can write to specified port
+            if (!portDirections.TryGetValue(portName, out bool isOutput))
+                throw new InvalidOperationException($"Port {portName} not configured.");
+
+            if (!isOutput)
+                throw new InvalidOperationException($"Cannot write to {portName}: port is configured as INPUT.");
+
             using NationalInstruments.DAQmx.Task doTask = new();
             string channel = $"{deviceName}/{portName}";
 
@@ -23,7 +34,10 @@ namespace IctCustomControlBoard
                 ChannelLineGrouping.OneChannelForAllLines);
 
             DigitalSingleChannelWriter writer = new(doTask.Stream);
-            writer.WriteSingleSamplePort(true, value);
+            doTask.Start();
+            writer.WriteSingleSamplePort(false, value);
+            doTask.Stop();
+
 
             // debug statement: remove later
             Console.WriteLine($"[{deviceName}] Set {portName} = 0x{value:X2}");
@@ -32,6 +46,13 @@ namespace IctCustomControlBoard
         // GetBits: read an 8-bit value from a digital input port
         public byte GetBits(string portName)
         {
+            // validate that we can read from specified port
+            if (!portDirections.TryGetValue(portName, out bool isOutput))
+                throw new InvalidOperationException($"Port {portName} not configured.");
+
+            if (isOutput)
+                throw new InvalidOperationException($"Cannot read from {portName}: port is configured as OUTPUT.");
+
             using NationalInstruments.DAQmx.Task diTask = new();
             string channel = $"{deviceName}/{portName}";
 
@@ -67,6 +88,28 @@ namespace IctCustomControlBoard
             // debug statement: remove later
             Console.WriteLine($"[{deviceName}] CH{channel} = {voltage:F3} V");
             return voltage;
+        }
+
+        public void ConfigurePort(string portName, bool isOutput)
+        {
+            using NationalInstruments.DAQmx.Task configTask = new();
+            string channel = $"{deviceName}/{portName}";
+            if (isOutput)
+            {
+                configTask.DOChannels.CreateChannel(channel, "", ChannelLineGrouping.OneChannelForAllLines);
+                Console.WriteLine($"[{deviceName}] {portName} configured as OUTPUT");
+            }
+            else
+            {
+                configTask.DIChannels.CreateChannel(channel, "", ChannelLineGrouping.OneChannelForAllLines);
+                Console.WriteLine($"[{deviceName}] {portName} configured as INPUT");
+            }
+
+            configTask.Start();
+            configTask.Stop();
+
+            // Store configuration in dictionary
+            portDirections[portName] = isOutput;
         }
 
         // GetIOID: returns device name
